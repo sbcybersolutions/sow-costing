@@ -1,0 +1,21 @@
+{% extends 'quotes/base.html' %}
+
+{% block content %}
+<h2>Start New Quote</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label>Client Name</label>
+        <input type="text" name="client_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Project Name</label>
+        <input type="text" name="project_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Date</label>
+        <input type="date" name="date" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Continue to Builder</button>
+</form>
+{% endblock %}

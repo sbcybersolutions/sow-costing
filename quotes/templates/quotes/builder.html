@@ -1,0 +1,107 @@
+{% extends 'quotes/base.html' %}
+
+{% block content %}
+<h2>Build Quote for {{ client_name }}</h2>
+
+<hr>
+
+<h3>Add Course</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ course_form.as_p }}
+    <button type="submit" name="add_course" class="btn btn-primary">Add Course</button>
+</form>
+
+<hr>
+
+<h3>Add Live Video</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ live_video_form.as_p }}
+    <button type="submit" name="add_live_video" class="btn btn-primary">Add Live Video</button>
+</form>
+
+<hr>
+
+<h3>Add Talent</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ talent_form.as_p }}
+    <button type="submit" name="add_talent" class="btn btn-primary">Add Talent</button>
+</form>
+
+<hr>
+
+<h3>Add Animated Video</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ animated_video_form.as_p }}
+    <button type="submit" name="add_animated_video" class="btn btn-primary">Add Animated Video</button>
+</form>
+
+<hr>
+
+<h3>Add Studio</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ studio_form.as_p }}
+    <button type="submit" name="add_studio" class="btn btn-primary">Add Studio</button>
+</form>
+
+<hr>
+
+<h3>Add Technical Staff & Editing</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ technical_form.as_p }}
+    <button type="submit" name="add_technical" class="btn btn-primary">Add Technical</button>
+</form>
+
+<hr>
+
+<!-- Example display of what’s been added -->
+<h3>Current Quote Items</h3>
+<h5>Courses:</h5>
+<ul>
+    {% for c in courses %}
+    <li>{{ c }}</li>
+    {% endfor %}
+</ul>
+
+<h5>Live Videos:</h5>
+<ul>
+    {% for lv in live_videos %}
+    <li>{{ lv }}</li>
+    {% endfor %}
+</ul>
+
+<h5>Talents:</h5>
+<ul>
+    {% for t in talents %}
+    <li>{{ t }}</li>
+    {% endfor %}
+</ul>
+
+<h5>Animated Videos:</h5>
+<ul>
+    {% for av in animated_videos %}
+    <li>{{ av }}</li>
+    {% endfor %}
+</ul>
+
+<h5>Studios:</h5>
+<ul>
+    {% for s in studios %}
+    <li>{{ s }}</li>
+    {% endfor %}
+</ul>
+
+<h5>Technical Staff:</h5>
+<ul>
+    {% for tech in technical_staff %}
+    <li>{{ tech }}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
+
