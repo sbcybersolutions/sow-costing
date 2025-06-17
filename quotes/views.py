@@ -11,6 +11,11 @@ from io import BytesIO
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
+from openpyxl.styles import numbers
+from quotes.models import (
+    Course, CourseResource, LiveVideo, Talent, AnimatedVideo,
+    Studio, TechnicalStaff, TechnicalRate, VideoTypeRate, FixedCost, StudioRate
+)
 
 
 def index(request):
@@ -179,64 +184,216 @@ def get_totals(request):
         'total_retail': total_retail
     })
 
-
-
-import openpyxl
-from openpyxl.utils import get_column_letter
-from io import BytesIO
-from django.http import HttpResponse
+# Export to Excel
 
 def export_excel(request):
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "SoW Internal Costs" #type: ignore
+    ws.title = "SoW Detailed Costs" #type: ignore
 
-    ws.append(["Asset Type", "Description", "Internal Cost"]) #type: ignore
+    row = 1
 
+    # Header
+    ws.append(["Asset Type", "Detail", "Quantity/Hours/Seconds", "Rate", "Cost"]) #type: ignore
+    row += 1
+
+    # COURSES
     for course in Course.objects.all():
-        ws.append(["Course", course.description, course.get_total_internal_cost()]) #type: ignore
+        ws.append([f"Course: {course.description} ({course.complexity})", "", "", "", ""]) #type: ignore
+        row += 1
 
-    for lv in LiveVideo.objects.all():
-        ws.append(["Live Video", lv.description, lv.get_total_internal_cost()]) #type: ignore
-        for talent in lv.talents.all(): #type: ignore
-            ws.append(["  └ Talent", talent.name, talent.get_internal_cost()]) #type: ignore
+        resources = CourseResource.objects.filter(complexity=course.complexity)
+        for r in resources:
+            cost = r.fixed_hours * r.hourly_rate
+            ws.append([ #type: ignore
+                "  └ Resource",
+                r.role_name,
+                r.fixed_hours,
+                f"${r.hourly_rate:.2f}",
+                f"${cost:.2f}"
+            ])
+            row += 1
 
-    for av in AnimatedVideo.objects.all():
-        ws.append(["Animated Video", av.description, av.get_total_internal_cost()]) #type: ignore
+        # Translation
+        if course.num_languages > 0:
+            translation_cost = course.get_translation_cost()
+            ws.append([ #type: ignore
+                "  └ Translation",
+                f"{course.num_languages} language(s)",
+                "",
+                "$500.00",
+                f"${translation_cost:.2f}"
+            ])
+            row += 1
 
-    for studio in Studio.objects.all():
-        ws.append(["Studio", studio.studio_name, studio.get_total_internal_cost()]) #type: ignore
-
-    for tech in TechnicalStaff.objects.all():
         ws.append([ #type: ignore
-            "Technical Staff",
-            f"{tech.filming_days} filming, {tech.editing_days} editing",
-            tech.get_total_internal_cost()
+            "  → Total Internal",
+            "",
+            "",
+            "",
+            f"${course.get_total_internal_cost():.2f}"
         ])
+        row += 2
 
-    # Auto-fit columns
+    # LIVE VIDEOS
+    for lv in LiveVideo.objects.all():
+        ws.append([f"Live Video: {lv.description} ({lv.video_type}, {lv.num_seconds}s)", "", "", "", ""]) #type: ignore
+        row += 1
+
+        # Fixed costs
+        for fc in FixedCost.objects.all():
+            ws.append([ #type: ignore
+                "  └ Fixed Cost",
+                fc.name,
+                "",
+                "",
+                f"${fc.amount:.2f}"
+            ])
+            row += 1
+
+        # Variable cost
+        rate = VideoTypeRate.objects.get(category="Live", type_name=lv.video_type).rate_per_second
+        variable_cost = lv.num_seconds * rate
+        ws.append([ #type: ignore
+            "  └ Variable",
+            f"{lv.num_seconds} sec",
+            "",
+            f"${rate:.2f}/sec",
+            f"${variable_cost:.2f}"
+        ])
+        row += 1
+
+        # Talents
+        for t in lv.talents.all(): #type: ignore
+            ws.append([ #type: ignore
+                "  └ Talent",
+                f"{t.name} ({t.role_type})",
+                "",
+                "",
+                f"${t.get_internal_cost():.2f}"
+            ])
+            row += 1
+
+        ws.append([ #type: ignore
+            "  → Total Internal",
+            "",
+            "",
+            "",
+            f"${lv.get_total_internal_cost():.2f}"
+        ])
+        row += 2
+
+    # ANIMATED VIDEOS
+    for av in AnimatedVideo.objects.all():
+        ws.append([f"Animated Video: {av.description} ({av.video_type}, {av.num_seconds}s)", "", "", "", ""]) #type: ignore
+        row += 1
+
+        for fc in FixedCost.objects.all():
+            ws.append([ #type: ignore
+                "  └ Fixed Cost",
+                fc.name,
+                "",
+                "",
+                f"${fc.amount:.2f}"
+            ])
+            row += 1
+
+        rate = VideoTypeRate.objects.get(category="Animated", type_name=av.video_type).rate_per_second
+        variable_cost = av.num_seconds * rate
+        ws.append([ #type: ignore
+            "  └ Variable", 
+            f"{av.num_seconds} sec",
+            "",
+            f"${rate:.2f}/sec",
+            f"${variable_cost:.2f}"
+        ])
+        row += 1
+
+        ws.append([ #type: ignore
+            "  → Total Internal",
+            "",
+            "",
+            "",
+            f"${av.get_total_internal_cost():.2f}"
+        ])
+        row += 2
+
+    # STUDIOS
+    for studio in Studio.objects.all():
+        ws.append([f"Studio: {studio.studio_name} ({studio.filming_days} day(s))", "", "", "", ""]) #type: ignore
+        row += 1
+
+        s_rate = StudioRate.objects.get(studio_name=studio.studio_name)
+        for label, value in [
+            ("Hire Rate", s_rate.hire_rate),
+            ("Studio Staff", s_rate.studio_staff),
+            ("Equipment", s_rate.equipment)
+        ]:
+            ws.append([ #type: ignore
+                "  └ Cost",
+                label,
+                "",
+                "",
+                f"${value:.2f} per day"
+            ])
+            row += 1
+
+        daily_total = s_rate.hire_rate + s_rate.studio_staff + s_rate.equipment
+        ws.append([ #type: ignore
+            "  → Total Internal",
+            f"{studio.filming_days} day(s) × ${daily_total:.2f}",
+            "",
+            "",
+            f"${studio.get_total_internal_cost():.2f}"
+        ])
+        row += 2
+
+    # TECHNICAL STAFF
+    for tech in TechnicalStaff.objects.all():
+        ws.append([f"Technical Staff ({tech.filming_days} filming day(s), {tech.editing_days} editing day(s))", "", "", "", ""])    #type: ignore
+        row += 1
+
+        for tr in TechnicalRate.objects.all():
+            ws.append([ #type: ignore
+                "  └ Daily Rate",
+                tr.role_name,
+                "",
+                "",
+                f"${tr.daily_rate:.2f} per day"
+            ])
+            row += 1
+
+        ws.append([ #type: ignore
+            "  → Total Internal",
+            "",
+            "",
+            "",
+            f"${tech.get_total_internal_cost():.2f}"
+        ])
+        row += 2
+
+    # Adjust column widths
     for col in ws.columns: #type: ignore
         max_length = 0
-        col_letter = get_column_letter(col[0].column if col[0].column else 1)
+        col_letter = get_column_letter(col[0].column)   #type: ignore
         for cell in col:
             if cell.value:
                 max_length = max(max_length, len(str(cell.value)))
         ws.column_dimensions[col_letter].width = max_length + 2 #type: ignore
 
-    # ✅ Save to in-memory buffer instead of save_virtual_workbook
-    file_buffer = BytesIO()
-    wb.save(file_buffer)
-    file_buffer.seek(0)
+    # Save to buffer
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
 
     response = HttpResponse(
-        file_buffer,
+        buffer,
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    response['Content-Disposition'] = 'attachment; filename="SoW_Internal.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="SoW_Detailed.xlsx"'
     return response
 
-
-
+# Export to PDF
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
