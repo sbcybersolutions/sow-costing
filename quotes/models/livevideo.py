@@ -1,4 +1,5 @@
 from django.db import models
+from .rates import VideoTypeRate, FixedCost  # ✅ pulls dynamic rates
 
 class LiveVideo(models.Model):
     VIDEO_TYPE_CHOICES = [
@@ -14,31 +15,23 @@ class LiveVideo(models.Model):
 
     def get_fixed_internal_cost(self):
         """
-        PreProduction ($375) + Music & Graphics ($100)
+        Sum all FixedCost rows (PreProduction, Music & Graphics, etc)
         """
-        return 375 + 100
+        total = sum(f.amount for f in FixedCost.objects.all())
+        return total
 
     def get_variable_internal_cost(self):
         """
-        Per-second rate for chosen video type.
+        Lookup per-second rate for this Live video type.
         """
-        rate_map = {
-            'Newsdesk': 8.50,
-            'Course Video': 12.60,
-            'Bespoke Video': 15.40,
-            'Music Video': 18.70,
-        }
-
-        rate = rate_map.get(str(self.video_type), 0)
+        rate = VideoTypeRate.objects.get(category="Live", type_name=self.video_type).rate_per_second
         return self.num_seconds * rate
 
     def get_talent_internal_cost(self):
         """
-        Sum internal cost for all attached talents.
-        The related_name 'talents' comes from Talent model.
+        Sum all attached Talent costs.
         """
         return sum(talent.get_internal_cost() for talent in self.talents.all()) #type: ignore
-
 
     def get_total_internal_cost(self):
         """

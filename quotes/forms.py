@@ -1,5 +1,8 @@
 from django import forms
-from .models import Course, LiveVideo, AnimatedVideo, Studio, Talent, TechnicalStaff
+from quotes.models import (
+    Course, LiveVideo, AnimatedVideo, Studio,
+    Talent, TechnicalStaff, TalentRate
+)
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -22,13 +25,22 @@ class LiveVideoForm(forms.ModelForm):
         }
 
 class TalentForm(forms.ModelForm):
+    name = forms.ChoiceField(choices=[], widget=forms.Select(attrs={'class': 'form-control'}))
+    live_video = forms.ModelChoiceField(
+        queryset=LiveVideo.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Talent
         fields = ['name', 'live_video']
-        widgets = {
-            'name': forms.Select(attrs={'class': 'form-control'}),
-            'live_video': forms.Select(attrs={'class': 'form-control'}),
-        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # ✅ Populate dropdown choices from TalentRate in DB
+        self.fields['name'].choices = [
+            (tr.name, tr.name) for tr in TalentRate.objects.all()
+        ]
 
 class AnimatedVideoForm(forms.ModelForm):
     class Meta:

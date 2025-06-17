@@ -1,4 +1,5 @@
 from django.db import models
+from .rates import TechnicalRate  # ✅ pulls dynamic rates
 
 class TechnicalStaff(models.Model):
     filming_days = models.PositiveIntegerField(default=1)
@@ -6,23 +7,17 @@ class TechnicalStaff(models.Model):
 
     def get_technical_internal_cost(self):
         """
-        Sum of Filming & Directing, Sound Monitoring, Lighting & Autocue,
-        Travel, Food & Water per filming day.
+        Sum daily rates for all technical roles × filming days.
         """
-        per_day = (
-            600 +  # Filming & Directing
-            600 +  # Sound Monitoring
-            470 +  # Lighting & Autocue
-            100 +  # Travel to Studio
-            100    # Food & Water
-        )
-        return self.filming_days * per_day
+        total = sum(r.daily_rate for r in TechnicalRate.objects.all())
+        return total * self.filming_days
 
     def get_editing_internal_cost(self):
         """
-        Editing days × $475.
+        Editing days × editing rate — store Editing in TechnicalRate too!
         """
-        return self.editing_days * 475
+        editing = TechnicalRate.objects.get(role_name="Editing").daily_rate
+        return self.editing_days * editing
 
     def get_total_internal_cost(self):
         return self.get_technical_internal_cost() + self.get_editing_internal_cost()
@@ -31,4 +26,4 @@ class TechnicalStaff(models.Model):
         return self.get_total_internal_cost() * 2
 
     def __str__(self):
-        return f"Technical Staff: {self.filming_days} filming days, {self.editing_days} editing days"
+        return f"Technical: {self.filming_days} filming, {self.editing_days} editing"

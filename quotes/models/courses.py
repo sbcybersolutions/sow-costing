@@ -1,4 +1,5 @@
 from django.db import models
+from .rates import CourseResource  # ✅ NEW: pulls rates from DB
 
 class Course(models.Model):
     COMPLEXITY_CHOICES = [
@@ -11,75 +12,42 @@ class Course(models.Model):
     description = models.CharField(max_length=255)
     num_languages = models.PositiveIntegerField(default=0)
 
-    def get_cost_map(self):
-        return {
-            'Simple': {
-                'SME': (1, 100),
-                'PM': (1, 35),
-                'Research & LO': (4, 35),
-                'Course Writing': (6, 40),
-                'Graphic Design': (2, 70),
-            },
-            'Medium': {
-                'SME': (2, 100),
-                'PM': (2, 35),
-                'Research & LO': (6, 35),
-                'Course Writing': (8, 40),
-                'Graphic Design': (2, 70),
-            },
-            'Complex': {
-                'SME': (3, 100),
-                'PM': (3, 35),
-                'Research & LO': (8, 35),
-                'Course Writing': (10, 40),
-                'Graphic Design': (2, 70),
-            },
-        }
-
     def get_base_internal_cost(self):
         """
-        Sum of resource hours × internal hourly rates
+        Lookup CourseResource rows for this complexity,
+        then sum fixed_hours × hourly_rate.
         """
-        key = str(self.complexity)
-        costs = self.get_cost_map().get(key)
-        if costs is None:
-            return 0
-
-        return sum(hours * rate for hours, rate in costs.values())
+        resources = CourseResource.objects.filter(complexity=self.complexity)
+        total = sum(r.fixed_hours * r.hourly_rate for r in resources)
+        return total
 
     def get_base_billing_cost(self):
         """
-        Sum of resource hours × billing rate (2x hourly rate)
+        Billing cost: base internal cost × 2.
         """
-        key = str(self.complexity)
-        costs = self.get_cost_map().get(key)
-        if costs is None:
-            return 0
-
-        return sum(hours * (rate * 2) for hours, rate in costs.values())
+        return self.get_base_internal_cost() * 2
 
     def get_translation_cost(self):
         """
-        Translation cost is internal = $500 per language,
-        billing = 2x ($1000 per language)
+        Translation cost is internal = $500 per language.
         """
         return self.num_languages * 500
 
     def get_translation_billing_cost(self):
         """
-        Billing version of translation cost: 2x
+        Billing version of translation: 2x.
         """
         return self.get_translation_cost() * 2
 
     def get_total_internal_cost(self):
         """
-        Base + translation, internal side
+        Base internal + translation internal.
         """
         return self.get_base_internal_cost() + self.get_translation_cost()
 
     def get_total_retail_cost(self):
         """
-        Always 2x the total internal cost.
+        Always 2x total internal.
         """
         return self.get_total_internal_cost() * 2
 

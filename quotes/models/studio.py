@@ -1,4 +1,5 @@
 from django.db import models
+from .rates import StudioRate  # ✅ dynamic daily rates
 
 class Studio(models.Model):
     STUDIO_CHOICES = [
@@ -12,17 +13,10 @@ class Studio(models.Model):
 
     def get_daily_internal_cost(self):
         """
-        Hire Rate + Studio Staff + Equipment for selected studio.
+        Lookup StudioRate row and sum Hire + Staff + Equipment.
         """
-        cost_map = {
-            'Kennington': {'Hire Rate': 945, 'Studio Staff': 270, 'Equipment': 270},
-            'SLV Studio 1': {'Hire Rate': 1005, 'Studio Staff': 0, 'Equipment': 640},
-            'SLV Studio 2': {'Hire Rate': 540, 'Studio Staff': 0, 'Equipment': 0},
-        }
-
-        daily = cost_map.get(str(self.studio_name), {})
-        total_daily = sum(daily.values())
-        return total_daily
+        studio = StudioRate.objects.get(studio_name=self.studio_name)
+        return studio.hire_rate + studio.studio_staff + studio.equipment
 
     def get_total_internal_cost(self):
         return self.get_daily_internal_cost() * self.filming_days

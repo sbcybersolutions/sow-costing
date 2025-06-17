@@ -1,4 +1,5 @@
 from django.db import models
+from .rates import VideoTypeRate, FixedCost  # ✅ dynamic rates
 
 class AnimatedVideo(models.Model):
     VIDEO_TYPE_CHOICES = [
@@ -13,21 +14,16 @@ class AnimatedVideo(models.Model):
 
     def get_fixed_internal_cost(self):
         """
-        PreProduction ($375) + Music & Graphics ($100)
+        Sum all FixedCost rows.
         """
-        return 375 + 100
+        total = sum(f.amount for f in FixedCost.objects.all())
+        return total
 
     def get_variable_internal_cost(self):
         """
-        Per-second rate for chosen video type.
+        Lookup per-second rate for this Animated video type.
         """
-        rate_map = {
-            'Explainer 1': 35.00,
-            'Explainer 2': 37.30,
-            'Explainer 3': 57.60,
-        }
-
-        rate = rate_map.get(str(self.video_type), 0)
+        rate = VideoTypeRate.objects.get(category="Animated", type_name=self.video_type).rate_per_second
         return self.num_seconds * rate
 
     def get_total_internal_cost(self):
@@ -38,3 +34,4 @@ class AnimatedVideo(models.Model):
 
     def __str__(self):
         return f"{self.video_type} ({self.num_seconds}s): {self.description}"
+
