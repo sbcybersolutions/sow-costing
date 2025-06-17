@@ -4,6 +4,9 @@
 <h2>Build Quote for {{ client_name }}</h2>
 
 <hr>
+<a href="{% url 'clear_all' %}" class="btn btn-warning">
+  Start Over (Clear All)
+</a>
 
 <h3>Add Course</h3>
 <form method="post">
@@ -63,43 +66,69 @@
 <h3>Current Quote Items</h3>
 <h5>Courses:</h5>
 <ul>
-    {% for c in courses %}
-    <li>{{ c }}</li>
-    {% endfor %}
+  {% for c in courses %}
+    <li>
+      {{ c }}
+      <a href="{% url 'delete_item' 'course' c.id %}" class="btn btn-sm btn-danger">Delete</a>
+    </li>
+  {% empty %}
+    <li>No courses added yet.</li>
+  {% endfor %}
 </ul>
+
 
 <h5>Live Videos:</h5>
 <ul>
     {% for lv in live_videos %}
-    <li>{{ lv }}</li>
+    <li>{{ lv }}
+        <a href="{% url 'delete_item' 'livevideo' lv.id %}" class="btn btn-sm btn-danger">Delete</a>
+    </li>
+    {% empty%}
+    <li>No live videos added yet.</li>
     {% endfor %}
 </ul>
 
 <h5>Talents:</h5>
 <ul>
     {% for t in talents %}
-    <li>{{ t }}</li>
+    <li>{{ t }}
+        <a href="{% url 'delete_item' 'talent' t.id %}" class="btn btn-sm btn-danger">Delete</a>
+    </li>
+    {% empty %}
+    <li>No talents added yet.</li>  
     {% endfor %}
 </ul>
 
 <h5>Animated Videos:</h5>
 <ul>
     {% for av in animated_videos %}
-    <li>{{ av }}</li>
+    <li>{{ av }}
+        <a href="{% url 'delete_item' 'animatedvideo' av.id %}" class="btn btn-sm btn-danger">Delete</a>
+    </li>
+    {% empty %}
+    <li>No animated videos added yet.</li>  
     {% endfor %}
 </ul>
 
 <h5>Studios:</h5>
 <ul>
     {% for s in studios %}
-    <li>{{ s }}</li>
+    <li>{{ s }}
+        <a href="{% url 'delete_item' 'studio' s.id %}" class="btn btn-sm btn-danger">Delete</a>
+    </li>
+    {% empty %}
+    <li>No studios added yet.</li>  
     {% endfor %}
 </ul>
 
 <h5>Technical Staff:</h5>
 <ul>
     {% for tech in technical_staff %}
-    <li>{{ tech }}</li>
+    <li>{{ tech }}
+        <a href="{% url 'delete_item' 'technical staff' tech.id %}" class="btn btn-sm btn-danger">Delete</a>
+    </li>
+    {% empty %}
+    <li>No technical staff added yet.</li>
     {% endfor %}
 </ul>
 

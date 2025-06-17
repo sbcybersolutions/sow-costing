@@ -102,3 +102,41 @@ def builder(request):
         'studios': studios,
         'technical_staff': technical_staff,
     })
+
+from django.urls import reverse
+
+from django.shortcuts import get_object_or_404
+
+# ✅ Delete a single asset
+def delete_item(request, model_name, pk):
+    MODEL_MAP = {
+        'course': Course,
+        'livevideo': LiveVideo,
+        'talent': Talent,
+        'animatedvideo': AnimatedVideo,
+        'studio': Studio,
+        'technical': TechnicalStaff,
+    }
+
+    Model = MODEL_MAP.get(model_name)
+    if Model is None:
+        return redirect('builder')
+
+    obj = get_object_or_404(Model, pk=pk)
+    obj.delete()
+    return redirect('builder')
+
+
+# ✅ Clear ALL quote items
+def clear_all(request):
+    Course.objects.all().delete()
+    LiveVideo.objects.all().delete()
+    Talent.objects.all().delete()
+    AnimatedVideo.objects.all().delete()
+    Studio.objects.all().delete()
+    TechnicalStaff.objects.all().delete()
+
+    # Optional: also clear session
+    request.session.flush()
+
+    return redirect('index')
