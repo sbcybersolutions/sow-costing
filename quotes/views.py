@@ -140,3 +140,33 @@ def clear_all(request):
     request.session.flush()
 
     return redirect('index')
+
+# Dynamic totals
+from django.http import JsonResponse
+
+def get_totals(request):
+    total_internal = 0
+
+    # Sum up all internal costs
+    for course in Course.objects.all():
+        total_internal += course.get_total_internal_cost()
+
+    for lv in LiveVideo.objects.all():
+        total_internal += lv.get_total_internal_cost()
+
+    for av in AnimatedVideo.objects.all():
+        total_internal += av.get_total_internal_cost()
+
+    for studio in Studio.objects.all():
+        total_internal += studio.get_total_internal_cost()
+
+    for tech in TechnicalStaff.objects.all():
+        total_internal += tech.get_total_internal_cost()
+
+    # Retail is always 2x internal by your rule
+    total_retail = total_internal * 2
+
+    return JsonResponse({
+        'total_internal': total_internal,
+        'total_retail': total_retail
+    })
