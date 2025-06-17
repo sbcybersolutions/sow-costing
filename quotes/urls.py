@@ -7,5 +7,7 @@ urlpatterns = [
     path('delete/<str:model_name>/<int:pk>/', views.delete_item, name='delete_item'),
     path('clear-all/', views.clear_all, name='clear_all'),
     path('api/get-totals/', views.get_totals, name='get_totals'),
+    path('export/excel/', views.export_excel, name='export_excel'),
+    path('export/pdf/', views.export_pdf, name='export_pdf'),
 ]
 

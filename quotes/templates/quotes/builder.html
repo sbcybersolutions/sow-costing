@@ -204,6 +204,9 @@
       <div class="card-body">
         <p><strong>Internal Cost:</strong> $<span id="totalInternal">0.00</span></p>
         <p><strong>Retail Cost:</strong> $<span id="totalRetail">0.00</span></p>
+        <a href="{% url 'export_excel' %}" class="btn btn-success">Download Excel</a>
+        <a href="{% url 'export_pdf' %}" class="btn btn-primary">Download PDF</a>
+
       </div>
     </div>
   </div>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Statement of Work</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>Statement of Work</h1>
+    <p><strong>Client:</strong> {{ client_name }}</p>
+    <p><strong>Project:</strong> {{ project_name }}</p>
+    <p><strong>Date:</strong> {{ date }}</p>
+
+    <h3>Quote Items</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Asset</th>
+                <th>Description</th>
+                <th>Retail Cost ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in courses %}
+                <tr><td>Course</td><td>{{ c.description }}</td><td>{{ c.get_total_retail_cost|floatformat:2 }}</td></tr>
+            {% endfor %}
+            {% for lv in live_videos %}
+                <tr><td>Live Video</td><td>{{ lv.description }}</td><td>{{ lv.get_total_retail_cost|floatformat:2 }}</td></tr>
+            {% endfor %}
+            {% for av in animated_videos %}
+                <tr><td>Animated Video</td><td>{{ av.description }}</td><td>{{ av.get_total_retail_cost|floatformat:2 }}</td></tr>
+            {% endfor %}
+            {% for s in studios %}
+                <tr><td>Studio</td><td>{{ s.studio_name }}</td><td>{{ s.get_total_retail_cost|floatformat:2 }}</td></tr>
+            {% endfor %}
+            {% for tech in technical_staff %}
+                <tr><td>Technical Staff</td><td>{{ tech.filming_days }} filming, {{ tech.editing_days }} editing</td><td>{{ tech.get_total_retail_cost|floatformat:2 }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p><strong>Total Retail Cost: ${{ total_retail|floatformat:2 }}</strong></p>
+</body>
+</html>

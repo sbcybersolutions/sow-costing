@@ -5,6 +5,14 @@ from .forms import (
 )
 from .models import Course, LiveVideo, Talent, AnimatedVideo, Studio, TechnicalStaff
 
+import openpyxl
+from openpyxl.utils import get_column_letter
+from io import BytesIO
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+
+
 def index(request):
     """
     The front page to enter Client Name, Project Name, and Date.
@@ -170,3 +178,101 @@ def get_totals(request):
         'total_internal': total_internal,
         'total_retail': total_retail
     })
+
+
+
+import openpyxl
+from openpyxl.utils import get_column_letter
+from io import BytesIO
+from django.http import HttpResponse
+
+def export_excel(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "SoW Internal Costs" #type: ignore
+
+    ws.append(["Asset Type", "Description", "Internal Cost"]) #type: ignore
+
+    for course in Course.objects.all():
+        ws.append(["Course", course.description, course.get_total_internal_cost()]) #type: ignore
+
+    for lv in LiveVideo.objects.all():
+        ws.append(["Live Video", lv.description, lv.get_total_internal_cost()]) #type: ignore
+        for talent in lv.talents.all(): #type: ignore
+            ws.append(["  └ Talent", talent.name, talent.get_internal_cost()]) #type: ignore
+
+    for av in AnimatedVideo.objects.all():
+        ws.append(["Animated Video", av.description, av.get_total_internal_cost()]) #type: ignore
+
+    for studio in Studio.objects.all():
+        ws.append(["Studio", studio.studio_name, studio.get_total_internal_cost()]) #type: ignore
+
+    for tech in TechnicalStaff.objects.all():
+        ws.append([ #type: ignore
+            "Technical Staff",
+            f"{tech.filming_days} filming, {tech.editing_days} editing",
+            tech.get_total_internal_cost()
+        ])
+
+    # Auto-fit columns
+    for col in ws.columns: #type: ignore
+        max_length = 0
+        col_letter = get_column_letter(col[0].column if col[0].column else 1)
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws.column_dimensions[col_letter].width = max_length + 2 #type: ignore
+
+    # ✅ Save to in-memory buffer instead of save_virtual_workbook
+    file_buffer = BytesIO()
+    wb.save(file_buffer)
+    file_buffer.seek(0)
+
+    response = HttpResponse(
+        file_buffer,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = 'attachment; filename="SoW_Internal.xlsx"'
+    return response
+
+
+
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+
+def export_pdf(request):
+    # Calculate total retail
+    total_internal = 0
+    for course in Course.objects.all():
+        total_internal += course.get_total_internal_cost()
+    for lv in LiveVideo.objects.all():
+        total_internal += lv.get_total_internal_cost()
+    for av in AnimatedVideo.objects.all():
+        total_internal += av.get_total_internal_cost()
+    for studio in Studio.objects.all():
+        total_internal += studio.get_total_internal_cost()
+    for tech in TechnicalStaff.objects.all():
+        total_internal += tech.get_total_internal_cost()
+    total_retail = total_internal * 2
+
+    context = {
+        "client_name": request.session.get('client_name'),
+        "project_name": request.session.get('project_name'),
+        "date": request.session.get('date'),
+        "courses": Course.objects.all(),
+        "live_videos": LiveVideo.objects.all(),
+        "animated_videos": AnimatedVideo.objects.all(),
+        "studios": Studio.objects.all(),
+        "technical_staff": TechnicalStaff.objects.all(),
+        "total_retail": total_retail,
+    }
+
+    html = render_to_string('quotes/quote_pdf.html', context)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="SoW_Client.pdf"'
+
+    # pisa.CreatePDF returns True/False
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err: #type: ignore
+        return HttpResponse('Error generating PDF', status=500)
+    return response
