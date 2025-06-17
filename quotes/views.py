@@ -14,22 +14,28 @@ from xhtml2pdf import pisa
 from openpyxl.styles import numbers
 from quotes.models import (
     Course, CourseResource, LiveVideo, Talent, AnimatedVideo,
-    Studio, TechnicalStaff, TechnicalRate, VideoTypeRate, FixedCost, StudioRate
+    Studio, TechnicalStaff, TechnicalRate, VideoTypeRate, FixedCost, StudioRate, Quote
 )
 
 
-def index(request):
-    """
-    The front page to enter Client Name, Project Name, and Date.
-    """
-    if request.method == 'POST':
-        client_name = request.POST.get('client_name')
-        project_name = request.POST.get('project_name')
-        date = request.POST.get('date')
+from quotes.models import Quote
 
-        request.session['client_name'] = client_name
-        request.session['project_name'] = project_name
-        request.session['date'] = date
+def index(request):
+    if request.method == 'POST':
+        client_name = request.POST['client_name']
+        project_name = request.POST['project_name']
+        date = request.POST['date']
+
+        # ✅ CREATE THE QUOTE FIRST:
+        quote = Quote.objects.create(
+            client_name=client_name,
+            project_name=project_name,
+            date=date,
+            created_by=request.user if request.user.is_authenticated else None
+        )
+
+        # ✅ Now you can store its ID:
+        request.session['quote_id'] = quote.id #type: ignore
 
         return redirect('builder')
 
@@ -37,15 +43,14 @@ def index(request):
 
 
 def builder(request):
-    """
-    The SOW builder page: add Courses, Videos, Talent, Studio, Technical Staff.
-    """
-    # Load saved client info
-    client_name = request.session.get('client_name')
-    project_name = request.session.get('project_name')
-    date = request.session.get('date')
+    # ✅ 1) Get active Quote ID safely
+    quote_id = request.session.get('quote_id')
+    if not quote_id:
+        return redirect('index')
 
-    # Forms
+    quote = Quote.objects.get(pk=quote_id)
+
+    # ✅ 2) Blank forms for GET
     course_form = CourseForm()
     live_video_form = LiveVideoForm()
     talent_form = TalentForm()
@@ -53,68 +58,53 @@ def builder(request):
     studio_form = StudioForm()
     technical_form = TechnicalStaffForm()
 
+    # ✅ 3) Handle POST for each form
     if request.method == 'POST':
-        if 'add_course' in request.POST:
-            course_form = CourseForm(request.POST)
-            if course_form.is_valid():
-                course_form.save()
-                return redirect('builder')
+        # One helper to reduce repetition:
+        def handle_form(form_class, button_name):
+            if button_name in request.POST:
+                form = form_class(request.POST)
+                if form.is_valid():
+                    obj = form.save(commit=False)
+                    obj.quote = quote
+                    obj.save()
+                    return True
+            return False
 
-        elif 'add_live_video' in request.POST:
-            live_video_form = LiveVideoForm(request.POST)
-            if live_video_form.is_valid():
-                live_video_form.save()
-                return redirect('builder')
+        if handle_form(CourseForm, 'add_course'):
+            return redirect('builder')
+        if handle_form(LiveVideoForm, 'add_live_video'):
+            return redirect('builder')
+        if handle_form(TalentForm, 'add_talent'):
+            return redirect('builder')
+        if handle_form(AnimatedVideoForm, 'add_animated_video'):
+            return redirect('builder')
+        if handle_form(StudioForm, 'add_studio'):
+            return redirect('builder')
+        if handle_form(TechnicalStaffForm, 'add_technical'):
+            return redirect('builder')
 
-        elif 'add_talent' in request.POST:
-            talent_form = TalentForm(request.POST)
-            if talent_form.is_valid():
-                talent_form.save()
-                return redirect('builder')
-
-        elif 'add_animated_video' in request.POST:
-            animated_video_form = AnimatedVideoForm(request.POST)
-            if animated_video_form.is_valid():
-                animated_video_form.save()
-                return redirect('builder')
-
-        elif 'add_studio' in request.POST:
-            studio_form = StudioForm(request.POST)
-            if studio_form.is_valid():
-                studio_form.save()
-                return redirect('builder')
-
-        elif 'add_technical' in request.POST:
-            technical_form = TechnicalStaffForm(request.POST)
-            if technical_form.is_valid():
-                technical_form.save()
-                return redirect('builder')
-
-    # Show all added items
-    courses = Course.objects.all()
-    live_videos = LiveVideo.objects.all()
-    talents = Talent.objects.all()
-    animated_videos = AnimatedVideo.objects.all()
-    studios = Studio.objects.all()
-    technical_staff = TechnicalStaff.objects.all()
-
-    return render(request, 'quotes/builder.html', {
-        'client_name': client_name,
-        'project_name': project_name,
-        'date': date,
+    # ✅ 4) Only assets linked to this Quote
+    context = {
+        'quote': quote,
+        'courses': quote.courses.all(), # type: ignore
+        'live_videos': quote.live_videos.all(), # type: ignore
+        'talents': quote.talents.all(), # type: ignore
+        'animated_videos': quote.animated_videos.all(), # type: ignore
+        'studios': quote.studios.all(), # type: ignore
+        'technical_staff': quote.technical_staff.all(), # type: ignore
         'course_form': course_form,
         'live_video_form': live_video_form,
         'talent_form': talent_form,
         'animated_video_form': animated_video_form,
         'studio_form': studio_form,
         'technical_form': technical_form,
-        'courses': courses,
-        'live_videos': live_videos,
-        'talents': talents,
-        'animated_videos': animated_videos,
-        'studios': studios,
-        'technical_staff': technical_staff,
-    })
+    }
+    return render(request, 'quotes/builder.html', context)
+
+def new_quote(request):
+    request.session.pop('quote_id', None)
+    return redirect('index')
 
 from django.urls import reverse
 
@@ -142,47 +132,49 @@ def delete_item(request, model_name, pk):
 
 # ✅ Clear ALL quote items
 def clear_all(request):
-    Course.objects.all().delete()
-    LiveVideo.objects.all().delete()
-    Talent.objects.all().delete()
-    AnimatedVideo.objects.all().delete()
-    Studio.objects.all().delete()
-    TechnicalStaff.objects.all().delete()
+    quote_id = request.session.get('quote_id')
+    if not quote_id:
+        return redirect('index')
 
-    # Optional: also clear session
-    request.session.flush()
+    quote = Quote.objects.get(pk=quote_id)
+    quote.courses.all().delete() # type: ignore
+    quote.live_videos.all().delete() # type: ignore
+    quote.animated_videos.all().delete() # type: ignore
+    quote.studios.all().delete() # type: ignore
+    quote.technical_staff.all().delete() # type: ignore
+    quote.talents.all().delete() # type: ignore
 
-    return redirect('index')
+    return redirect('builder')
+
 
 # Dynamic totals
 from django.http import JsonResponse
 
+from django.http import JsonResponse
+from quotes.models import Quote
+
 def get_totals(request):
-    total_internal = 0
+    quote_id = request.session.get('quote_id')
+    if not quote_id:
+        return JsonResponse({'total_internal': 0, 'total_retail': 0})
 
-    # Sum up all internal costs
-    for course in Course.objects.all():
-        total_internal += course.get_total_internal_cost()
+    quote = Quote.objects.get(pk=quote_id)
 
-    for lv in LiveVideo.objects.all():
-        total_internal += lv.get_total_internal_cost()
+    total_internal = sum([
+        sum(c.get_total_internal_cost() for c in quote.courses.all()), # type: ignore
+        sum(lv.get_total_internal_cost() for lv in quote.live_videos.all()), # type: ignore
+        sum(av.get_total_internal_cost() for av in quote.animated_videos.all()), # type: ignore
+        sum(s.get_total_internal_cost() for s in quote.studios.all()), # type: ignore
+        sum(t.get_total_internal_cost() for t in quote.technical_staff.all()), # type: ignore
+    ])
 
-    for av in AnimatedVideo.objects.all():
-        total_internal += av.get_total_internal_cost()
-
-    for studio in Studio.objects.all():
-        total_internal += studio.get_total_internal_cost()
-
-    for tech in TechnicalStaff.objects.all():
-        total_internal += tech.get_total_internal_cost()
-
-    # Retail is always 2x internal by your rule
-    total_retail = total_internal * 2
+    total_retail = total_internal * 2  # or your custom rule
 
     return JsonResponse({
         'total_internal': total_internal,
         'total_retail': total_retail
     })
+
 
 # Export to Excel
 
@@ -433,3 +425,34 @@ def export_pdf(request):
     if pisa_status.err: #type: ignore
         return HttpResponse('Error generating PDF', status=500)
     return response
+
+from quotes.models import Quote
+
+def quote_review(request):
+    quote_id = request.session.get('quote_id')
+    if not quote_id:
+        return redirect('index')
+
+    quote = Quote.objects.get(pk=quote_id)
+
+    total_internal = sum([
+        sum(c.get_total_internal_cost() for c in quote.courses.all()), # type: ignore
+        sum(lv.get_total_internal_cost() for lv in quote.live_videos.all()), # type: ignore
+        sum(av.get_total_internal_cost() for av in quote.animated_videos.all()), # type: ignore
+        sum(s.get_total_internal_cost() for s in quote.studios.all()), # type: ignore
+        sum(t.get_total_internal_cost() for t in quote.technical_staff.all()), # type: ignore
+    ])
+
+    total_retail = total_internal * 2
+
+    return render(request, 'quotes/quote_review.html', {
+        "quote": quote,
+        "courses": quote.courses.all(), # type: ignore
+        "live_videos": quote.live_videos.all(), # type: ignore
+        "animated_videos": quote.animated_videos.all(), # type: ignore
+        "studios": quote.studios.all(), # type: ignore
+        "technical_staff": quote.technical_staff.all(), # type: ignore
+        "total_internal": total_internal,
+        "total_retail": total_retail,
+    })
+

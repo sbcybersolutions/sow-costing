@@ -194,6 +194,7 @@
     </ul>
 
     <a href="{% url 'clear_all' %}" class="btn btn-warning mt-3">Start Over</a>
+    <a href="{% url 'quote_review' %}" class="btn btn-success mt-4">Done — Review Quote</a>
 
   </div>
 
@@ -206,6 +207,8 @@
         <p><strong>Retail Cost:</strong> $<span id="totalRetail">0.00</span></p>
         <a href="{% url 'export_excel' %}" class="btn btn-success">Download Excel</a>
         <a href="{% url 'export_pdf' %}" class="btn btn-primary">Download PDF</a>
+        <a href="{% url 'new_quote' %}" class="btn btn-danger">Start New Quote</a>
+
 
       </div>
     </div>

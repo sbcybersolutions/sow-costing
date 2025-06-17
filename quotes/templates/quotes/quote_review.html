@@ -1,0 +1,67 @@
+{% extends "quotes/base.html" %}
+
+{% block title %}Quote Review{% endblock %}
+
+{% block content %}
+<h2>Quote Review</h2>
+
+<p><strong>Client:</strong> {{ quote.client_name }}</p>
+<p><strong>Project:</strong> {{ quote.project_name }}</p>
+<p><strong>Date:</strong> {{ quote.date }}</p>
+
+<hr>
+
+<h4>Courses</h4>
+<ul>
+  {% for c in courses %}
+    <li>{{ c }} — Internal: ${{ c.get_total_internal_cost|floatformat:2 }} | Retail: ${{ c.get_total_retail_cost|floatformat:2 }}</li>
+  {% empty %}
+    <li>No courses.</li>
+  {% endfor %}
+</ul>
+
+<h4>Live Videos</h4>
+<ul>
+  {% for lv in live_videos %}
+    <li>{{ lv }} — Internal: ${{ lv.get_total_internal_cost|floatformat:2 }} | Retail: ${{ lv.get_total_retail_cost|floatformat:2 }}</li>
+  {% empty %}
+    <li>No live videos.</li>
+  {% endfor %}
+</ul>
+
+<h4>Animated Videos</h4>
+<ul>
+  {% for av in animated_videos %}
+    <li>{{ av }} — Internal: ${{ av.get_total_internal_cost|floatformat:2 }} | Retail: ${{ av.get_total_retail_cost|floatformat:2 }}</li>
+  {% empty %}
+    <li>No animated videos.</li>
+  {% endfor %}
+</ul>
+
+<h4>Studios</h4>
+<ul>
+  {% for s in studios %}
+    <li>{{ s }} — Internal: ${{ s.get_total_internal_cost|floatformat:2 }} | Retail: ${{ s.get_total_retail_cost|floatformat:2 }}</li>
+  {% empty %}
+    <li>No studios.</li>
+  {% endfor %}
+</ul>
+
+<h4>Technical Staff</h4>
+<ul>
+  {% for tech in technical_staff %}
+    <li>{{ tech }} — Internal: ${{ tech.get_total_internal_cost|floatformat:2 }} | Retail: ${{ tech.get_total_retail_cost|floatformat:2 }}</li>
+  {% empty %}
+    <li>No technical staff.</li>
+  {% endfor %}
+</ul>
+
+<hr>
+
+<h3>Total Internal Cost: ${{ total_internal|floatformat:2 }}</h3>
+<h3>Total Retail Cost: ${{ total_retail|floatformat:2 }}</h3>
+
+<a href="{% url 'export_excel' %}" class="btn btn-success">Download Excel</a>
+<a href="{% url 'export_pdf' %}" class="btn btn-primary">Download PDF</a>
+<a href="{% url 'builder' %}" class="btn btn-secondary">Back to Builder</a>
+{% endblock %}

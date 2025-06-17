@@ -9,5 +9,7 @@ urlpatterns = [
     path('api/get-totals/', views.get_totals, name='get_totals'),
     path('export/excel/', views.export_excel, name='export_excel'),
     path('export/pdf/', views.export_pdf, name='export_pdf'),
+    path('quote-review/', views.quote_review, name='quote_review'),
+    path('new-quote/', views.new_quote, name='new_quote'),
 ]
 
