@@ -1,7 +1,15 @@
 from django.db import models
 from .rates import TechnicalRate  # ✅ pulls dynamic rates
+from quotes.models.quote import Quote  # Assuming Quote model exists
 
 class TechnicalStaff(models.Model):
+    quote = models.ForeignKey(
+        Quote, 
+        on_delete=models.CASCADE, 
+        related_name='technical_staff',
+        null =True, 
+        blank=True, 
+    )
     filming_days = models.PositiveIntegerField(default=1)
     editing_days = models.PositiveIntegerField(default=0)
 

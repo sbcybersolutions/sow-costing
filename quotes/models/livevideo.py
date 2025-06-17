@@ -1,7 +1,9 @@
 from django.db import models
 from .rates import VideoTypeRate, FixedCost  # ✅ pulls dynamic rates
+from quotes.models.quote import Quote
 
 class LiveVideo(models.Model):
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='live_videos', null=True, blank=True)
     VIDEO_TYPE_CHOICES = [
         ('Newsdesk', 'Newsdesk'),
         ('Course Video', 'Course Video'),

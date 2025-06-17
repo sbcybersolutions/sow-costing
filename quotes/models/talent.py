@@ -1,8 +1,16 @@
 from django.db import models
 from quotes.models.livevideo import LiveVideo  # ✅ absolute import
 from quotes.models.rates import TalentRate     # ✅ absolute import
+from quotes.models.quote import Quote  # Assuming Quote model exists
 
 class Talent(models.Model):
+    quote = models.ForeignKey(
+        Quote, 
+        on_delete=models.CASCADE, 
+        related_name='talents',
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=50)
     role_type = models.CharField(max_length=20, blank=True)  # auto-set from TalentRate
     rate = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)

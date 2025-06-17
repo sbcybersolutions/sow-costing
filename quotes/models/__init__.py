@@ -5,6 +5,7 @@ from .studio import Studio
 from .talent import Talent
 from .technical import TechnicalStaff
 from .rates import CourseResource, VideoTypeRate, FixedCost, StudioRate, TechnicalRate, TalentRate
+from .quote import Quote
 
 __all__ = [
     'Course',
@@ -15,4 +16,5 @@ __all__ = [
     'TechnicalStaff',
     'CourseResource', 'VideoTypeRate', 'FixedCost', 'StudioRate',
     'TechnicalRate', 'TalentRate',
+    'Quote',
 ]

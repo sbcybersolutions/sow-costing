@@ -1,7 +1,10 @@
 from django.db import models
 from .rates import StudioRate  # ✅ dynamic daily rates
+from quotes.models.quote import Quote  # Assuming Quote model exists
 
 class Studio(models.Model):
+    quote = models.ForeignKey(
+        Quote, on_delete=models.CASCADE, related_name='studios', null=True, blank=True)
     STUDIO_CHOICES = [
         ('Kennington', 'Kennington'),
         ('SLV Studio 1', 'SLV Studio 1'),

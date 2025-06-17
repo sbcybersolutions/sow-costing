@@ -1,7 +1,10 @@
 from django.db import models
 from .rates import VideoTypeRate, FixedCost  # ✅ dynamic rates
+from quotes.models.quote import Quote  # Assuming Quote model exists
 
 class AnimatedVideo(models.Model):
+    quote = models.ForeignKey(
+        Quote, on_delete=models.CASCADE, related_name='animated_videos', null=True, blank=True)
     VIDEO_TYPE_CHOICES = [
         ('Explainer 1', 'Explainer 1'),
         ('Explainer 2', 'Explainer 2'),

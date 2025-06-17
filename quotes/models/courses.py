@@ -1,7 +1,9 @@
 from django.db import models
 from .rates import CourseResource  # ✅ NEW: pulls rates from DB
+from quotes.models.quote import Quote  # ✅ NEW: import Quote model
 
 class Course(models.Model):
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='courses', null=True, blank=True)
     COMPLEXITY_CHOICES = [
         ('Simple', 'Simple'),
         ('Medium', 'Medium'),
