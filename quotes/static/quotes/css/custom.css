@@ -1,0 +1,63 @@
+:root {
+  --color-bg: #F9FAFB;
+  --color-primary: #0D6EFD;   /* blue */
+  --color-primary-dark: #0B5ED7;
+  --color-secondary: #6C757D; /* grey accent */
+  --color-text: #212529;      /* dark text */
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.navbar {
+  background-color: var(--color-primary-dark);
+}
+
+.navbar-brand, .nav-link {
+  color: #fff !important;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.btn-success {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-success:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.btn-danger {
+  background-color: #dc3545; /* Bootstrap red */
+  border-color: #dc3545;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.card-header {
+  background-color: var(--color-primary-dark);
+  color: #fff;
+}
+
+a {
+  color: var(--color-primary-dark);
+}
+
+a:hover {
+  color: var(--color-primary);
+}

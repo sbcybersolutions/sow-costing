@@ -26,21 +26,23 @@ class LiveVideoForm(forms.ModelForm):
 
 class TalentForm(forms.ModelForm):
     name = forms.ChoiceField(choices=[], widget=forms.Select(attrs={'class': 'form-control'}))
-    live_video = forms.ModelChoiceField(
-        queryset=LiveVideo.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
+    live_video = forms.ModelChoiceField(queryset=LiveVideo.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Talent
         fields = ['name', 'live_video']
 
     def __init__(self, *args, **kwargs):
+        quote = kwargs.pop('quote', None)  # ✅ pull quote from kwargs
         super().__init__(*args, **kwargs)
-        # ✅ Populate dropdown choices from TalentRate in DB
-        self.fields['name'].choices = [
-            (tr.name, tr.name) for tr in TalentRate.objects.all()
-        ]
+
+        # ✅ Populate talent name choices
+        self.fields['name'].choices = [(tr.name, tr.name) for tr in TalentRate.objects.all()]
+
+        # ✅ Limit Live Videos to this quote only
+        if quote:
+            self.fields['live_video'].queryset = quote.live_videos.all() #type: ignore
+
 
 class AnimatedVideoForm(forms.ModelForm):
     class Meta:

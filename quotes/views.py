@@ -53,7 +53,7 @@ def builder(request):
     # ✅ 2) Blank forms for GET
     course_form = CourseForm()
     live_video_form = LiveVideoForm()
-    talent_form = TalentForm()
+    talent_form = TalentForm(quote=quote)  # Pass quote to TalentForm
     animated_video_form = AnimatedVideoForm()
     studio_form = StudioForm()
     technical_form = TechnicalStaffForm()
@@ -179,201 +179,84 @@ def get_totals(request):
 # Export to Excel
 
 def export_excel(request):
+    # ✅ 1) Pull active Quote ID from session
+    quote_id = request.session.get('quote_id')
+    if not quote_id:
+        return redirect('index')
+
+    quote = Quote.objects.get(pk=quote_id)
+
+    # ✅ 2) Create workbook
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "SoW Detailed Costs" #type: ignore
+    ws.title = "SoW Detailed Costs" # type: ignore
 
-    row = 1
+    # ✅ 3) Add header row
+    ws.append(["Asset Type", "Description", "Internal Cost", "Retail Cost"]) # type: ignore
 
-    # Header
-    ws.append(["Asset Type", "Detail", "Quantity/Hours/Seconds", "Rate", "Cost"]) #type: ignore
-    row += 1
-
-    # COURSES
-    for course in Course.objects.all():
-        ws.append([f"Course: {course.description} ({course.complexity})", "", "", "", ""]) #type: ignore
-        row += 1
-
-        resources = CourseResource.objects.filter(complexity=course.complexity)
-        for r in resources:
-            cost = r.fixed_hours * r.hourly_rate
-            ws.append([ #type: ignore
-                "  └ Resource",
-                r.role_name,
-                r.fixed_hours,
-                f"${r.hourly_rate:.2f}",
-                f"${cost:.2f}"
-            ])
-            row += 1
-
-        # Translation
-        if course.num_languages > 0:
-            translation_cost = course.get_translation_cost()
-            ws.append([ #type: ignore
-                "  └ Translation",
-                f"{course.num_languages} language(s)",
-                "",
-                "$500.00",
-                f"${translation_cost:.2f}"
-            ])
-            row += 1
-
-        ws.append([ #type: ignore
-            "  → Total Internal",
-            "",
-            "",
-            "",
-            f"${course.get_total_internal_cost():.2f}"
+    # ✅ 4) Add Courses for this Quote only
+    for course in quote.courses.all(): # type: ignore
+        ws.append([ # type: ignore
+            "Course",
+            course.description,
+            f"${course.get_total_internal_cost():.2f}",
+            f"${course.get_total_retail_cost():.2f}"
         ])
-        row += 2
 
-    # LIVE VIDEOS
-    for lv in LiveVideo.objects.all():
-        ws.append([f"Live Video: {lv.description} ({lv.video_type}, {lv.num_seconds}s)", "", "", "", ""]) #type: ignore
-        row += 1
-
-        # Fixed costs
-        for fc in FixedCost.objects.all():
-            ws.append([ #type: ignore
-                "  └ Fixed Cost",
-                fc.name,
-                "",
-                "",
-                f"${fc.amount:.2f}"
-            ])
-            row += 1
-
-        # Variable cost
-        rate = VideoTypeRate.objects.get(category="Live", type_name=lv.video_type).rate_per_second
-        variable_cost = lv.num_seconds * rate
+    # ✅ 5) Add Live Videos for this Quote only
+    for lv in quote.live_videos.all(): # type: ignore
         ws.append([ #type: ignore
-            "  └ Variable",
-            f"{lv.num_seconds} sec",
-            "",
-            f"${rate:.2f}/sec",
-            f"${variable_cost:.2f}"
+            "Live Video",
+            lv.description,
+            f"${lv.get_total_internal_cost():.2f}",
+            f"${lv.get_total_retail_cost():.2f}"
         ])
-        row += 1
-
-        # Talents
-        for t in lv.talents.all(): #type: ignore
+        # Include attached Talents for this Live Video
+        for talent in lv.talents.all():
             ws.append([ #type: ignore
                 "  └ Talent",
-                f"{t.name} ({t.role_type})",
-                "",
-                "",
-                f"${t.get_internal_cost():.2f}"
+                f"{talent.name} ({talent.role_type})",
+                f"${talent.get_internal_cost():.2f}",
+                f"${talent.get_retail_cost():.2f}"
             ])
-            row += 1
 
-        ws.append([ #type: ignore
-            "  → Total Internal",
-            "",
-            "",
-            "",
-            f"${lv.get_total_internal_cost():.2f}"
+    # ✅ 6) Add Animated Videos
+    for av in quote.animated_videos.all(): # type: ignore
+        ws.append([ # type: ignore
+            "Animated Video",
+            av.description,
+            f"${av.get_total_internal_cost():.2f}",
+            f"${av.get_total_retail_cost():.2f}"
         ])
-        row += 2
 
-    # ANIMATED VIDEOS
-    for av in AnimatedVideo.objects.all():
-        ws.append([f"Animated Video: {av.description} ({av.video_type}, {av.num_seconds}s)", "", "", "", ""]) #type: ignore
-        row += 1
-
-        for fc in FixedCost.objects.all():
-            ws.append([ #type: ignore
-                "  └ Fixed Cost",
-                fc.name,
-                "",
-                "",
-                f"${fc.amount:.2f}"
-            ])
-            row += 1
-
-        rate = VideoTypeRate.objects.get(category="Animated", type_name=av.video_type).rate_per_second
-        variable_cost = av.num_seconds * rate
-        ws.append([ #type: ignore
-            "  └ Variable", 
-            f"{av.num_seconds} sec",
-            "",
-            f"${rate:.2f}/sec",
-            f"${variable_cost:.2f}"
+    # ✅ 7) Add Studios
+    for studio in quote.studios.all(): # type: ignore
+        ws.append([ # type: ignore
+            "Studio",
+            studio.studio_name,
+            f"${studio.get_total_internal_cost():.2f}",
+            f"${studio.get_total_retail_cost():.2f}"
         ])
-        row += 1
 
-        ws.append([ #type: ignore
-            "  → Total Internal",
-            "",
-            "",
-            "",
-            f"${av.get_total_internal_cost():.2f}"
+    # ✅ 8) Add Technical Staff
+    for tech in quote.technical_staff.all():    # type: ignore
+        ws.append([ # type: ignore
+            "Technical Staff",
+            f"{tech.filming_days} filming day(s), {tech.editing_days} editing day(s)",
+            f"${tech.get_total_internal_cost():.2f}",
+            f"${tech.get_total_retail_cost():.2f}"
         ])
-        row += 2
 
-    # STUDIOS
-    for studio in Studio.objects.all():
-        ws.append([f"Studio: {studio.studio_name} ({studio.filming_days} day(s))", "", "", "", ""]) #type: ignore
-        row += 1
-
-        s_rate = StudioRate.objects.get(studio_name=studio.studio_name)
-        for label, value in [
-            ("Hire Rate", s_rate.hire_rate),
-            ("Studio Staff", s_rate.studio_staff),
-            ("Equipment", s_rate.equipment)
-        ]:
-            ws.append([ #type: ignore
-                "  └ Cost",
-                label,
-                "",
-                "",
-                f"${value:.2f} per day"
-            ])
-            row += 1
-
-        daily_total = s_rate.hire_rate + s_rate.studio_staff + s_rate.equipment
-        ws.append([ #type: ignore
-            "  → Total Internal",
-            f"{studio.filming_days} day(s) × ${daily_total:.2f}",
-            "",
-            "",
-            f"${studio.get_total_internal_cost():.2f}"
-        ])
-        row += 2
-
-    # TECHNICAL STAFF
-    for tech in TechnicalStaff.objects.all():
-        ws.append([f"Technical Staff ({tech.filming_days} filming day(s), {tech.editing_days} editing day(s))", "", "", "", ""])    #type: ignore
-        row += 1
-
-        for tr in TechnicalRate.objects.all():
-            ws.append([ #type: ignore
-                "  └ Daily Rate",
-                tr.role_name,
-                "",
-                "",
-                f"${tr.daily_rate:.2f} per day"
-            ])
-            row += 1
-
-        ws.append([ #type: ignore
-            "  → Total Internal",
-            "",
-            "",
-            "",
-            f"${tech.get_total_internal_cost():.2f}"
-        ])
-        row += 2
-
-    # Adjust column widths
-    for col in ws.columns: #type: ignore
+    # ✅ 9) Auto-fit column widths
+    for col in ws.columns: # type: ignore
         max_length = 0
-        col_letter = get_column_letter(col[0].column)   #type: ignore
+        col_letter = get_column_letter(col[0].column) # type: ignore
         for cell in col:
             if cell.value:
                 max_length = max(max_length, len(str(cell.value)))
-        ws.column_dimensions[col_letter].width = max_length + 2 #type: ignore
+        ws.column_dimensions[col_letter].width = max_length + 2 # type: ignore
 
-    # Save to buffer
+    # ✅ 10) Save to buffer
     buffer = BytesIO()
     wb.save(buffer)
     buffer.seek(0)
@@ -390,29 +273,30 @@ from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
 def export_pdf(request):
-    # Calculate total retail
-    total_internal = 0
-    for course in Course.objects.all():
-        total_internal += course.get_total_internal_cost()
-    for lv in LiveVideo.objects.all():
-        total_internal += lv.get_total_internal_cost()
-    for av in AnimatedVideo.objects.all():
-        total_internal += av.get_total_internal_cost()
-    for studio in Studio.objects.all():
-        total_internal += studio.get_total_internal_cost()
-    for tech in TechnicalStaff.objects.all():
-        total_internal += tech.get_total_internal_cost()
+    quote_id = request.session.get('quote_id')
+    if not quote_id:
+        return redirect('index')
+
+    quote = Quote.objects.get(pk=quote_id)
+
+    total_internal = sum([
+        sum(c.get_total_internal_cost() for c in quote.courses.all()), # type: ignore
+        sum(lv.get_total_internal_cost() for lv in quote.live_videos.all()), # type: ignore
+        sum(av.get_total_internal_cost() for av in quote.animated_videos.all()), # type: ignore
+        sum(s.get_total_internal_cost() for s in quote.studios.all()),  # type: ignore
+        sum(t.get_total_internal_cost() for t in quote.technical_staff.all()), # type: ignore
+    ])
     total_retail = total_internal * 2
 
     context = {
-        "client_name": request.session.get('client_name'),
-        "project_name": request.session.get('project_name'),
-        "date": request.session.get('date'),
-        "courses": Course.objects.all(),
-        "live_videos": LiveVideo.objects.all(),
-        "animated_videos": AnimatedVideo.objects.all(),
-        "studios": Studio.objects.all(),
-        "technical_staff": TechnicalStaff.objects.all(),
+        "client_name": quote.client_name,
+        "project_name": quote.project_name,
+        "date": quote.date,
+        "courses": quote.courses.all(), # type: ignore
+        "live_videos": quote.live_videos.all(), # type: ignore
+        "animated_videos": quote.animated_videos.all(), # type: ignore
+        "studios": quote.studios.all(), # type: ignore
+        "technical_staff": quote.technical_staff.all(), # type: ignore
         "total_retail": total_retail,
     }
 
@@ -420,7 +304,6 @@ def export_pdf(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="SoW_Client.pdf"'
 
-    # pisa.CreatePDF returns True/False
     pisa_status = pisa.CreatePDF(html, dest=response)
     if pisa_status.err: #type: ignore
         return HttpResponse('Error generating PDF', status=500)

@@ -1,221 +1,221 @@
 {% extends 'quotes/base.html' %}
 
-{% block title %}SoW Builder{% endblock %}
+{% block title %}Quote Builder{% endblock %}
 
 {% block content %}
-<div class="row">
-  <!-- Main builder area -->
-  <div class="col-md-8">
+<div class="container-fluid">
+  <div class="row">
 
-    <h2 class="mb-4">Build Quote for {{ client_name }}</h2>
+    <!-- Main builder area -->
+    <div class="col-lg-8 mb-4">
 
-    <!-- Accordion for add forms -->
-    <div class="accordion" id="quoteForms">
-
-      <!-- Add Course -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCourse">
-            Add Course
-          </button>
-        </h2>
-        <div id="collapseCourse" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            <form method="post">
-              {% csrf_token %}
-              {{ course_form.as_p }}
-              <button type="submit" name="add_course" class="btn btn-primary">Add Course</button>
-            </form>
-          </div>
+      <!-- Quote info -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Building Quote: {{ quote.client_name }} — {{ quote.project_name }} ({{ quote.date }})</h5>
         </div>
       </div>
 
-      <!-- Add Live Video -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLiveVideo">
-            Add Live Video
-          </button>
-        </h2>
-        <div id="collapseLiveVideo" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            <form method="post">
-              {% csrf_token %}
-              {{ live_video_form.as_p }}
-              <button type="submit" name="add_live_video" class="btn btn-primary">Add Live Video</button>
-            </form>
+      <!-- Accordion for adding assets -->
+      <div class="accordion" id="assetAccordion">
+
+        <!-- Add Course -->
+        <div class="accordion-item mb-2 shadow-sm">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCourse">
+              ➕ Add Course
+            </button>
+          </h2>
+          <div id="collapseCourse" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <form method="post">
+                {% csrf_token %}
+                {{ course_form.as_p }}
+                <button type="submit" name="add_course" class="btn btn-primary btn-sm">Add Course</button>
+              </form>
+            </div>
           </div>
+        </div>
+
+        <!-- Add Live Video -->
+        <div class="accordion-item mb-2 shadow-sm">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLiveVideo">
+              🎥 Add Live Video
+            </button>
+          </h2>
+          <div id="collapseLiveVideo" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <form method="post">
+                {% csrf_token %}
+                {{ live_video_form.as_p }}
+                <button type="submit" name="add_live_video" class="btn btn-primary btn-sm">Add Live Video</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Talent -->
+        <div class="accordion-item mb-2 shadow-sm">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTalent">
+              🎭 Add Talent
+            </button>
+          </h2>
+          <div id="collapseTalent" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <form method="post">
+                {% csrf_token %}
+                {{ talent_form.as_p }}
+                <button type="submit" name="add_talent" class="btn btn-primary btn-sm">Add Talent</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Animated Video -->
+        <div class="accordion-item mb-2 shadow-sm">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnimatedVideo">
+              ✏️ Add Animated Video
+            </button>
+          </h2>
+          <div id="collapseAnimatedVideo" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <form method="post">
+                {% csrf_token %}
+                {{ animated_video_form.as_p }}
+                <button type="submit" name="add_animated_video" class="btn btn-primary btn-sm">Add Animated Video</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Studio -->
+        <div class="accordion-item mb-2 shadow-sm">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudio">
+              🎬 Add Studio
+            </button>
+          </h2>
+          <div id="collapseStudio" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <form method="post">
+                {% csrf_token %}
+                {{ studio_form.as_p }}
+                <button type="submit" name="add_studio" class="btn btn-primary btn-sm">Add Studio</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Technical Staff -->
+        <div class="accordion-item mb-2 shadow-sm">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTechnical">
+              👷 Add Technical Staff
+            </button>
+          </h2>
+          <div id="collapseTechnical" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <form method="post">
+                {% csrf_token %}
+                {{ technical_form.as_p }}
+                <button type="submit" name="add_technical" class="btn btn-primary btn-sm">Add Technical Staff</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Added items list -->
+      <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">Current Items in Quote</h6>
+        </div>
+        <div class="card-body">
+          <h6>Courses:</h6>
+          <ul>
+            {% for c in courses %}
+              <li>{{ c }}</li>
+            {% empty %}
+              <li>No Courses</li>
+            {% endfor %}
+          </ul>
+
+          <h6>Live Videos:</h6>
+          <ul>
+            {% for lv in live_videos %}
+              <li>{{ lv }}</li>
+            {% empty %}
+              <li>No Live Videos</li>
+            {% endfor %}
+          </ul>
+
+          <h6>Talents:</h6>
+          <ul>
+            {% for t in talents %}
+              <li>{{ t }}</li>
+            {% empty %}
+              <li>No Talents</li>
+            {% endfor %}
+          </ul>
+
+          <h6>Animated Videos:</h6>
+          <ul>
+            {% for av in animated_videos %}
+              <li>{{ av }}</li>
+            {% empty %}
+              <li>No Animated Videos</li>
+            {% endfor %}
+          </ul>
+
+          <h6>Studios:</h6>
+          <ul>
+            {% for s in studios %}
+              <li>{{ s }}</li>
+            {% empty %}
+              <li>No Studios</li>
+            {% endfor %}
+          </ul>
+
+          <h6>Technical Staff:</h6>
+          <ul>
+            {% for tech in technical_staff %}
+              <li>{{ tech }}</li>
+            {% empty %}
+              <li>No Technical Staff</li>
+            {% endfor %}
+          </ul>
         </div>
       </div>
 
-      <!-- Add Talent -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTalent">
-            Add Talent
-          </button>
-        </h2>
-        <div id="collapseTalent" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            <form method="post">
-              {% csrf_token %}
-              {{ talent_form.as_p }}
-              <button type="submit" name="add_talent" class="btn btn-primary">Add Talent</button>
-            </form>
-          </div>
-        </div>
+      <!-- Controls -->
+      <div class="mt-3">
+        <a href="{% url 'quote_review' %}" class="btn btn-success">Done — Review Quote</a>
+        <a href="{% url 'clear_all' %}" class="btn btn-danger">Clear Quote Items</a>
       </div>
-
-      <!-- Add Animated Video -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnimatedVideo">
-            Add Animated Video
-          </button>
-        </h2>
-        <div id="collapseAnimatedVideo" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            <form method="post">
-              {% csrf_token %}
-              {{ animated_video_form.as_p }}
-              <button type="submit" name="add_animated_video" class="btn btn-primary">Add Animated Video</button>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add Studio -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudio">
-            Add Studio
-          </button>
-        </h2>
-        <div id="collapseStudio" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            <form method="post">
-              {% csrf_token %}
-              {{ studio_form.as_p }}
-              <button type="submit" name="add_studio" class="btn btn-primary">Add Studio</button>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add Technical Staff -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTechnical">
-            Add Technical Staff & Editing
-          </button>
-        </h2>
-        <div id="collapseTechnical" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            <form method="post">
-              {% csrf_token %}
-              {{ technical_form.as_p }}
-              <button type="submit" name="add_technical" class="btn btn-primary">Add Technical</button>
-            </form>
-          </div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Current Items -->
-    <hr class="my-4">
-
-    <h4>Quote Items</h4>
-
-    <h5>Courses:</h5>
-    <ul>
-      {% for c in courses %}
-        <li>{{ c }} 
-          <a href="{% url 'delete_item' 'course' c.id %}" class="btn btn-sm btn-danger">Delete</a>
-        </li>
-      {% empty %}
-        <li>No courses added yet.</li>
-      {% endfor %}
-    </ul>
-
-    <h5>Live Videos:</h5>
-    <ul>
-      {% for lv in live_videos %}
-        <li>{{ lv }} 
-          <a href="{% url 'delete_item' 'livevideo' lv.id %}" class="btn btn-sm btn-danger">Delete</a>
-        </li>
-      {% empty %}
-        <li>No live videos added yet.</li>
-      {% endfor %}
-    </ul>
-
-    <h5>Talents:</h5>
-    <ul>
-      {% for t in talents %}
-        <li>{{ t }} 
-          <a href="{% url 'delete_item' 'talent' t.id %}" class="btn btn-sm btn-danger">Delete</a>
-        </li>
-      {% empty %}
-        <li>No talents added yet.</li>
-      {% endfor %}
-    </ul>
-
-    <h5>Animated Videos:</h5>
-    <ul>
-      {% for av in animated_videos %}
-        <li>{{ av }} 
-          <a href="{% url 'delete_item' 'animatedvideo' av.id %}" class="btn btn-sm btn-danger">Delete</a>
-        </li>
-      {% empty %}
-        <li>No animated videos added yet.</li>
-      {% endfor %}
-    </ul>
-
-    <h5>Studios:</h5>
-    <ul>
-      {% for s in studios %}
-        <li>{{ s }} 
-          <a href="{% url 'delete_item' 'studio' s.id %}" class="btn btn-sm btn-danger">Delete</a>
-        </li>
-      {% empty %}
-        <li>No studios added yet.</li>
-      {% endfor %}
-    </ul>
-
-    <h5>Technical Staff:</h5>
-    <ul>
-      {% for tech in technical_staff %}
-        <li>{{ tech }} 
-          <a href="{% url 'delete_item' 'technical' tech.id %}" class="btn btn-sm btn-danger">Delete</a>
-        </li>
-      {% empty %}
-        <li>No technical staff added yet.</li>
-      {% endfor %}
-    </ul>
-
-    <a href="{% url 'clear_all' %}" class="btn btn-warning mt-3">Start Over</a>
-    <a href="{% url 'quote_review' %}" class="btn btn-success mt-4">Done — Review Quote</a>
-
-  </div>
-
-  <!-- Sidebar for live totals -->
-  <div class="col-md-4">
-    <div class="card sticky-top">
-      <div class="card-header bg-dark text-white">Quote Totals</div>
-      <div class="card-body">
-        <p><strong>Internal Cost:</strong> $<span id="totalInternal">0.00</span></p>
-        <p><strong>Retail Cost:</strong> $<span id="totalRetail">0.00</span></p>
-        <a href="{% url 'export_excel' %}" class="btn btn-success">Download Excel</a>
-        <a href="{% url 'export_pdf' %}" class="btn btn-primary">Download PDF</a>
-        <a href="{% url 'new_quote' %}" class="btn btn-danger">Start New Quote</a>
-
-
+    <!-- Sidebar for live totals -->
+    <div class="col-lg-4">
+      <div class="card sticky-top shadow-sm">
+        <div class="card-header bg-primary text-white">Quote Totals</div>
+        <div class="card-body">
+          <p><strong>Internal Cost:</strong> $<span id="totalInternal">0.00</span></p>
+          <p><strong>Retail Cost:</strong> $<span id="totalRetail">0.00</span></p>
+          <a href="{% url 'export_excel' %}" class="btn btn-primary w-100 mb-2">Download Excel</a>
+          <a href="{% url 'export_pdf' %}" class="btn btn-primary w-100 mb-2">Download PDF</a>
+          <a href="{% url 'new_quote' %}" class="btn btn-danger w-100">Start New Quote</a>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- JavaScript to update totals -->
+<!-- Sidebar live totals updater -->
 <script>
   async function updateTotals() {
     const response = await fetch("{% url 'get_totals' %}");
@@ -223,10 +223,7 @@
     document.getElementById('totalInternal').innerText = data.total_internal.toFixed(2);
     document.getElementById('totalRetail').innerText = data.total_retail.toFixed(2);
   }
-
-  // Initial load + auto-refresh every 3 seconds
   updateTotals();
   setInterval(updateTotals, 3000);
 </script>
-
 {% endblock %}

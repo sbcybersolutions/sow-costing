@@ -3,65 +3,137 @@
 {% block title %}Quote Review{% endblock %}
 
 {% block content %}
-<h2>Quote Review</h2>
+<div class="container my-4">
 
-<p><strong>Client:</strong> {{ quote.client_name }}</p>
-<p><strong>Project:</strong> {{ quote.project_name }}</p>
-<p><strong>Date:</strong> {{ quote.date }}</p>
+  <!-- Quote info card -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Quote Review</h5>
+    </div>
+    <div class="card-body">
+      <p><strong>Client:</strong> {{ quote.client_name }}</p>
+      <p><strong>Project:</strong> {{ quote.project_name }}</p>
+      <p><strong>Date:</strong> {{ quote.date }}</p>
+    </div>
+  </div>
 
-<hr>
+  <!-- Assets grouped in cards -->
+  <div class="row">
+    <div class="col-md-8">
 
-<h4>Courses</h4>
-<ul>
-  {% for c in courses %}
-    <li>{{ c }} — Internal: ${{ c.get_total_internal_cost|floatformat:2 }} | Retail: ${{ c.get_total_retail_cost|floatformat:2 }}</li>
-  {% empty %}
-    <li>No courses.</li>
-  {% endfor %}
-</ul>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">Courses</h6>
+        </div>
+        <div class="card-body">
+          {% if courses %}
+            <ul class="list-group list-group-flush">
+              {% for c in courses %}
+                <li class="list-group-item">
+                  {{ c }} — Internal: ${{ c.get_total_internal_cost|floatformat:2 }} | Retail: ${{ c.get_total_retail_cost|floatformat:2 }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No Courses.</p>
+          {% endif %}
+        </div>
+      </div>
 
-<h4>Live Videos</h4>
-<ul>
-  {% for lv in live_videos %}
-    <li>{{ lv }} — Internal: ${{ lv.get_total_internal_cost|floatformat:2 }} | Retail: ${{ lv.get_total_retail_cost|floatformat:2 }}</li>
-  {% empty %}
-    <li>No live videos.</li>
-  {% endfor %}
-</ul>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">Live Videos</h6>
+        </div>
+        <div class="card-body">
+          {% if live_videos %}
+            <ul class="list-group list-group-flush">
+              {% for lv in live_videos %}
+                <li class="list-group-item">
+                  {{ lv }} — Internal: ${{ lv.get_total_internal_cost|floatformat:2 }} | Retail: ${{ lv.get_total_retail_cost|floatformat:2 }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No Live Videos.</p>
+          {% endif %}
+        </div>
+      </div>
 
-<h4>Animated Videos</h4>
-<ul>
-  {% for av in animated_videos %}
-    <li>{{ av }} — Internal: ${{ av.get_total_internal_cost|floatformat:2 }} | Retail: ${{ av.get_total_retail_cost|floatformat:2 }}</li>
-  {% empty %}
-    <li>No animated videos.</li>
-  {% endfor %}
-</ul>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">Animated Videos</h6>
+        </div>
+        <div class="card-body">
+          {% if animated_videos %}
+            <ul class="list-group list-group-flush">
+              {% for av in animated_videos %}
+                <li class="list-group-item">
+                  {{ av }} — Internal: ${{ av.get_total_internal_cost|floatformat:2 }} | Retail: ${{ av.get_total_retail_cost|floatformat:2 }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No Animated Videos.</p>
+          {% endif %}
+        </div>
+      </div>
 
-<h4>Studios</h4>
-<ul>
-  {% for s in studios %}
-    <li>{{ s }} — Internal: ${{ s.get_total_internal_cost|floatformat:2 }} | Retail: ${{ s.get_total_retail_cost|floatformat:2 }}</li>
-  {% empty %}
-    <li>No studios.</li>
-  {% endfor %}
-</ul>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">Studios</h6>
+        </div>
+        <div class="card-body">
+          {% if studios %}
+            <ul class="list-group list-group-flush">
+              {% for s in studios %}
+                <li class="list-group-item">
+                  {{ s }} — Internal: ${{ s.get_total_internal_cost|floatformat:2 }} | Retail: ${{ s.get_total_retail_cost|floatformat:2 }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No Studios.</p>
+          {% endif %}
+        </div>
+      </div>
 
-<h4>Technical Staff</h4>
-<ul>
-  {% for tech in technical_staff %}
-    <li>{{ tech }} — Internal: ${{ tech.get_total_internal_cost|floatformat:2 }} | Retail: ${{ tech.get_total_retail_cost|floatformat:2 }}</li>
-  {% empty %}
-    <li>No technical staff.</li>
-  {% endfor %}
-</ul>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">Technical Staff</h6>
+        </div>
+        <div class="card-body">
+          {% if technical_staff %}
+            <ul class="list-group list-group-flush">
+              {% for tech in technical_staff %}
+                <li class="list-group-item">
+                  {{ tech }} — Internal: ${{ tech.get_total_internal_cost|floatformat:2 }} | Retail: ${{ tech.get_total_retail_cost|floatformat:2 }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No Technical Staff.</p>
+          {% endif %}
+        </div>
+      </div>
 
-<hr>
+    </div>
 
-<h3>Total Internal Cost: ${{ total_internal|floatformat:2 }}</h3>
-<h3>Total Retail Cost: ${{ total_retail|floatformat:2 }}</h3>
+    <!-- Sidebar: Total Summary -->
+    <div class="col-md-4">
+      <div class="card shadow-sm sticky-top">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">Quote Summary</h6>
+        </div>
+        <div class="card-body">
+          <p><strong>Total Internal:</strong> ${{ total_internal|floatformat:2 }}</p>
+          <p><strong>Total Retail:</strong> ${{ total_retail|floatformat:2 }}</p>
+          <a href="{% url 'export_excel' %}" class="btn btn-primary w-100 mb-2">Download Excel</a>
+          <a href="{% url 'export_pdf' %}" class="btn btn-primary w-100 mb-2">Download PDF</a>
+          <a href="{% url 'builder' %}" class="btn btn-secondary w-100">Back to Builder</a>
+        </div>
+      </div>
+    </div>
 
-<a href="{% url 'export_excel' %}" class="btn btn-success">Download Excel</a>
-<a href="{% url 'export_pdf' %}" class="btn btn-primary">Download PDF</a>
-<a href="{% url 'builder' %}" class="btn btn-secondary">Back to Builder</a>
+  </div>
+</div>
 {% endblock %}

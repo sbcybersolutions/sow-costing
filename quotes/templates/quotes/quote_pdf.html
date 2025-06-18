@@ -1,49 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Statement of Work</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Statement of Work</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      color: #212529;
+    }
+    .header {
+      background-color: #0D6EFD; /* Your primary blue */
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    .section {
+      margin-top: 30px;
+    }
+    h1, h2, h3 {
+      margin: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #0D6EFD;
+      color: #fff;
+      text-align: left;
+    }
+    .totals {
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+  </style>
 </head>
 <body>
+
+  <div class="header">
     <h1>Statement of Work</h1>
-    <p><strong>Client:</strong> {{ client_name }}</p>
-    <p><strong>Project:</strong> {{ project_name }}</p>
-    <p><strong>Date:</strong> {{ date }}</p>
+  </div>
 
-    <h3>Quote Items</h3>
+  <div class="section">
+    <h3>Client: {{ client_name }}</h3>
+    <h3>Project: {{ project_name }}</h3>
+    <h3>Date: {{ date }}</h3>
+  </div>
+
+  <div class="section">
+    <h2>Quote Details</h2>
     <table>
-        <thead>
-            <tr>
-                <th>Asset</th>
-                <th>Description</th>
-                <th>Retail Cost ($)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for c in courses %}
-                <tr><td>Course</td><td>{{ c.description }}</td><td>{{ c.get_total_retail_cost|floatformat:2 }}</td></tr>
-            {% endfor %}
-            {% for lv in live_videos %}
-                <tr><td>Live Video</td><td>{{ lv.description }}</td><td>{{ lv.get_total_retail_cost|floatformat:2 }}</td></tr>
-            {% endfor %}
-            {% for av in animated_videos %}
-                <tr><td>Animated Video</td><td>{{ av.description }}</td><td>{{ av.get_total_retail_cost|floatformat:2 }}</td></tr>
-            {% endfor %}
-            {% for s in studios %}
-                <tr><td>Studio</td><td>{{ s.studio_name }}</td><td>{{ s.get_total_retail_cost|floatformat:2 }}</td></tr>
-            {% endfor %}
-            {% for tech in technical_staff %}
-                <tr><td>Technical Staff</td><td>{{ tech.filming_days }} filming, {{ tech.editing_days }} editing</td><td>{{ tech.get_total_retail_cost|floatformat:2 }}</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Description</th>
+          <th>Retail Cost ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in courses %}
+        <tr>
+          <td>Course</td>
+          <td>{{ c.description }}</td>
+          <td>${{ c.get_total_retail_cost|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
 
+        {% for lv in live_videos %}
+        <tr>
+          <td>Live Video</td>
+          <td>{{ lv.description }}</td>
+          <td>${{ lv.get_total_retail_cost|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+
+        {% for av in animated_videos %}
+        <tr>
+          <td>Animated Video</td>
+          <td>{{ av.description }}</td>
+          <td>${{ av.get_total_retail_cost|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+
+        {% for s in studios %}
+        <tr>
+          <td>Studio</td>
+          <td>{{ s.studio_name }}</td>
+          <td>${{ s.get_total_retail_cost|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+
+        {% for tech in technical_staff %}
+        <tr>
+          <td>Technical Staff</td>
+          <td>{{ tech.filming_days }} filming day(s), {{ tech.editing_days }} editing day(s)</td>
+          <td>${{ tech.get_total_retail_cost|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="totals">
     <p><strong>Total Retail Cost: ${{ total_retail|floatformat:2 }}</strong></p>
+  </div>
+
 </body>
 </html>

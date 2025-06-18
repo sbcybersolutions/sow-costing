@@ -1,21 +1,31 @@
 {% extends 'quotes/base.html' %}
 
+{% block title %}Start New Quote{% endblock %}
+
 {% block content %}
-<h2>Start New Quote</h2>
-<form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label>Client Name</label>
-        <input type="text" name="client_name" class="form-control" required>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow-sm" style="width: 100%; max-width: 500px;">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Start New Quote</h4>
     </div>
-    <div class="mb-3">
-        <label>Project Name</label>
-        <input type="text" name="project_name" class="form-control" required>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="clientName" class="form-label">Client Name</label>
+          <input type="text" name="client_name" id="clientName" class="form-control form-control-sm" required>
+        </div>
+        <div class="mb-3">
+          <label for="projectName" class="form-label">Project Name</label>
+          <input type="text" name="project_name" id="projectName" class="form-control form-control-sm" required>
+        </div>
+        <div class="mb-3">
+          <label for="quoteDate" class="form-label">Date</label>
+          <input type="date" name="date" id="quoteDate" class="form-control form-control-sm" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create Quote</button>
+      </form>
     </div>
-    <div class="mb-3">
-        <label>Date</label>
-        <input type="date" name="date" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Continue to Builder</button>
-</form>
+  </div>
+</div>
 {% endblock %}
