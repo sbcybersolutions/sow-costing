@@ -37,4 +37,3 @@ class AnimatedVideo(models.Model):
 
     def __str__(self):
         return f"{self.video_type} ({self.num_seconds}s): {self.description}"
-
