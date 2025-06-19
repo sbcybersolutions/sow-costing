@@ -1,0 +1,36 @@
+{% extends 'quotes/base.html' %}
+
+{% block title %}All Quotes{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2>All Quotes</h2>
+  <table class="table table-striped mt-3">
+    <thead class="table-primary">
+      <tr>
+        <th>Client</th>
+        <th>Project</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for quote in quotes %}
+      <tr>
+        <td>{{ quote.client_name }}</td>
+        <td>{{ quote.project_name }}</td>
+        <td>{{ quote.date }}</td>
+        <td>
+          <a href="{% url 'resume_quote' quote.id %}" class="btn btn-sm btn-primary">Open</a>
+          <a href="{% url 'review_specific_quote' quote.id %}" class="btn btn-sm btn-secondary">Review</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center">No quotes found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

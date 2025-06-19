@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from quotes.models import Quote
+from django.shortcuts import render, redirect, get_object_or_404
+from quotes.models import Quote, Talent
 from quotes.forms import (
     CourseForm, LiveVideoForm, TalentForm,
     AnimatedVideoForm, StudioForm, TechnicalStaffForm
@@ -103,6 +103,45 @@ def quote_review(request):
         "quote": quote,
         "courses": quote.courses.all(), # type: ignore
         "live_videos": quote.live_videos.all(), # type: ignore
+        "animated_videos": quote.animated_videos.all(), # type: ignore
+        "studios": quote.studios.all(), # type: ignore
+        "technical_staff": quote.technical_staff.all(), # type: ignore
+        "total_internal": total_internal,
+        "total_retail": total_retail,
+    })
+
+# Review old quotes
+
+def quote_list(request):
+    # If you have auth, filter by user:
+    # quotes = Quote.objects.filter(created_by=request.user)
+    quotes = Quote.objects.all().order_by('-created_at')
+    return render(request, 'quotes/quote_list.html', {'quotes': quotes})
+
+def resume_quote(request, quote_id):
+    # ✅ Set this quote as active
+    quote = get_object_or_404(Quote, pk=quote_id)
+    request.session['quote_id'] = quote.id # type: ignore
+    return redirect('builder')
+
+
+def review_specific_quote(request, quote_id):
+    quote = get_object_or_404(Quote, pk=quote_id)
+
+    total_internal = sum([
+        sum(c.get_total_internal_cost() for c in quote.courses.all()), # type: ignore
+        sum(lv.get_total_internal_cost() for lv in quote.live_videos.all()), # type: ignore
+        sum(av.get_total_internal_cost() for av in quote.animated_videos.all()), # type: ignore
+        sum(s.get_total_internal_cost() for s in quote.studios.all()), # type: ignore
+        sum(t.get_total_internal_cost() for t in quote.technical_staff.all()), # type: ignore
+    ])
+    total_retail = total_internal * 2
+
+    return render(request, 'quotes/quote_review.html', {
+        "quote": quote,
+        "courses": quote.courses.all(), # type: ignore
+        "live_videos": quote.live_videos.all(), # type: ignore
+        "talents": Talent.objects.filter(live_video__quote=quote), # type: ignore
         "animated_videos": quote.animated_videos.all(), # type: ignore
         "studios": quote.studios.all(), # type: ignore
         "technical_staff": quote.technical_staff.all(), # type: ignore
