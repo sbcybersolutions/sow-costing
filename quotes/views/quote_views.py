@@ -113,10 +113,10 @@ def quote_review(request):
 # Review old quotes
 
 def quote_list(request):
-    # If you have auth, filter by user:
-    # quotes = Quote.objects.filter(created_by=request.user)
-    quotes = Quote.objects.all().order_by('-created_at')
-    return render(request, 'quotes/quote_list.html', {'quotes': quotes})
+    quotes = Quote.objects.filter(is_archived=False).order_by('-created_at')
+    archived = Quote.objects.filter(is_archived=True).order_by('-created_at')
+    return render(request, 'quotes/quote_list.html', {'quotes': quotes, 'archived': archived})
+
 
 def resume_quote(request, quote_id):
     # ✅ Set this quote as active

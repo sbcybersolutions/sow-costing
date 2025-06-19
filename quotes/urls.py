@@ -14,5 +14,7 @@ urlpatterns = [
     path('quotes/', views.quote_list, name='quote_list'),
     path('quote/<int:quote_id>/resume/', views.resume_quote, name='resume_quote'),
     path('quote/<int:quote_id>/review/', views.review_specific_quote, name='review_specific_quote'),
+    path('quote/<int:quote_id>/clone/', views.clone_quote, name='clone_quote'),
+    path('quote/<int:quote_id>/archive/', views.toggle_archive, name='toggle_archive'),
 ]
 
