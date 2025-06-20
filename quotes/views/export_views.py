@@ -1,10 +1,10 @@
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from xhtml2pdf import pisa
+from weasyprint import HTML
 import openpyxl
 from openpyxl.utils import get_column_letter
 from io import BytesIO
-from quotes.models import Quote
+from quotes.models import Quote, Talent
 
 def export_excel(request):
     quote_id = request.session.get('quote_id')
@@ -75,19 +75,19 @@ def export_pdf(request):
         "client_name": quote.client_name,
         "project_name": quote.project_name,
         "date": quote.date,
+        "status": quote.status,
         "courses": quote.courses.all(), # type: ignore
         "live_videos": quote.live_videos.all(), # type: ignore
+        "talents": Talent.objects.filter(live_video__quote=quote), # type: ignore
         "animated_videos": quote.animated_videos.all(), # type: ignore
         "studios": quote.studios.all(), # type: ignore
         "technical_staff": quote.technical_staff.all(), # type: ignore
         "total_retail": total_retail,
     }
 
-    html = render_to_string('quotes/quote_pdf.html', context)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="SoW_Client.pdf"'
+    html_string = render_to_string('quotes/quote_pdf.html', context)
+    pdf_file = HTML(string=html_string).write_pdf()
 
-    pisa_status = pisa.CreatePDF(html, dest=response)
-    if pisa_status.err: # type: ignore
-        return HttpResponse('Error generating PDF', status=500)
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="SoW_Client.pdf"'
     return response

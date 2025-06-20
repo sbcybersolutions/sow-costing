@@ -5,111 +5,140 @@
   <title>Statement of Work</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       margin: 40px;
-      color: #212529;
+      color: #333;
     }
-    .header {
-      background-color: #0D6EFD; /* Your primary blue */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #0D6EFD;
+      padding-bottom: 10px;
+    }
+    header img {
+      height: 50px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      font-size: 12px;
       color: #fff;
-      padding: 20px;
-      text-align: center;
+      border-radius: 4px;
     }
-    .section {
-      margin-top: 30px;
-    }
-    h1, h2, h3 {
+    .badge-draft { background: #6c757d; }
+    .badge-sent { background: #0D6EFD; }
+    .badge-accepted { background: #198754; }
+    .badge-rejected { background: #dc3545; }
+
+    h1, h2 {
       margin: 0;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
+      margin-top: 30px;
     }
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
     }
     th {
-      background-color: #0D6EFD;
+      background: #0D6EFD;
       color: #fff;
-      text-align: left;
     }
-    .totals {
-      margin-top: 20px;
-      font-size: 1.1em;
+    tfoot td {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>Statement of Work</h1>
+<header>
+  <img src="YOUR_LOGO_URL" alt="Company Logo">
+  <div>
+    <h2>Statement of Work</h2>
+    {% if status == "Draft" %}
+      <span class="badge badge-draft">{{ status }}</span>
+    {% elif status == "Sent" %}
+      <span class="badge badge-sent">{{ status }}</span>
+    {% elif status == "Accepted" %}
+      <span class="badge badge-accepted">{{ status }}</span>
+    {% elif status == "Rejected" %}
+      <span class="badge badge-rejected">{{ status }}</span>
+    {% endif %}
   </div>
+</header>
 
-  <div class="section">
-    <h3>Client: {{ client_name }}</h3>
-    <h3>Project: {{ project_name }}</h3>
-    <h3>Date: {{ date }}</h3>
-  </div>
+<p><strong>Client:</strong> {{ client_name }}</p>
+<p><strong>Project:</strong> {{ project_name }}</p>
+<p><strong>Date:</strong> {{ date }}</p>
 
-  <div class="section">
-    <h2>Quote Details</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Asset</th>
-          <th>Description</th>
-          <th>Retail Cost ($)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for c in courses %}
-        <tr>
-          <td>Course</td>
-          <td>{{ c.description }}</td>
-          <td>${{ c.get_total_retail_cost|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
+<h3>Quote Breakdown</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Asset</th>
+      <th>Description</th>
+      <th>Retail Cost ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in courses %}
+    <tr>
+      <td>Course</td>
+      <td>{{ c.description }}</td>
+      <td>${{ c.get_total_retail_cost|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
 
-        {% for lv in live_videos %}
-        <tr>
-          <td>Live Video</td>
-          <td>{{ lv.description }}</td>
-          <td>${{ lv.get_total_retail_cost|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
+    {% for lv in live_videos %}
+    <tr>
+      <td>Live Video</td>
+      <td>{{ lv.description }}</td>
+      <td>${{ lv.get_total_retail_cost|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
 
-        {% for av in animated_videos %}
-        <tr>
-          <td>Animated Video</td>
-          <td>{{ av.description }}</td>
-          <td>${{ av.get_total_retail_cost|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
+    {% for t in talents %}
+    <tr>
+      <td>Talent</td>
+      <td>{{ t.name }} ({{ t.role_type }})</td>
+      <td>${{ t.get_retail_cost|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
 
-        {% for s in studios %}
-        <tr>
-          <td>Studio</td>
-          <td>{{ s.studio_name }}</td>
-          <td>${{ s.get_total_retail_cost|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
+    {% for av in animated_videos %}
+    <tr>
+      <td>Animated Video</td>
+      <td>{{ av.description }}</td>
+      <td>${{ av.get_total_retail_cost|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
 
-        {% for tech in technical_staff %}
-        <tr>
-          <td>Technical Staff</td>
-          <td>{{ tech.filming_days }} filming day(s), {{ tech.editing_days }} editing day(s)</td>
-          <td>${{ tech.get_total_retail_cost|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    {% for s in studios %}
+    <tr>
+      <td>Studio</td>
+      <td>{{ s.studio_name }}</td>
+      <td>${{ s.get_total_retail_cost|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
 
-  <div class="totals">
-    <p><strong>Total Retail Cost: ${{ total_retail|floatformat:2 }}</strong></p>
-  </div>
+    {% for tech in technical_staff %}
+    <tr>
+      <td>Technical Staff</td>
+      <td>{{ tech.filming_days }} filming day(s), {{ tech.editing_days }} editing day(s)</td>
+      <td>${{ tech.get_total_retail_cost|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">Total Retail Cost</td>
+      <td>${{ total_retail|floatformat:2 }}</td>
+    </tr>
+  </tfoot>
+</table>
 
 </body>
 </html>
