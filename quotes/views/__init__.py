@@ -4,7 +4,7 @@ from .quote_views import (
 )
 from .asset_views import (
     clear_all, new_quote, delete_item,
-    clone_quote, toggle_archive  # ✅ add these!
+    clone_quote, toggle_archive, update_status  # ✅ add these!
 )
 from .api_views import get_totals
 from .export_views import export_excel, export_pdf
@@ -14,5 +14,5 @@ __all__ = [
     "quote_list", "resume_quote", "review_specific_quote",
     "clear_all", "new_quote", "delete_item",
     "clone_quote", "toggle_archive",
-    "get_totals", "export_excel", "export_pdf"
+    "get_totals", "export_excel", "export_pdf", "update_status"
 ]

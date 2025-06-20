@@ -16,5 +16,6 @@ urlpatterns = [
     path('quote/<int:quote_id>/review/', views.review_specific_quote, name='review_specific_quote'),
     path('quote/<int:quote_id>/clone/', views.clone_quote, name='clone_quote'),
     path('quote/<int:quote_id>/archive/', views.toggle_archive, name='toggle_archive'),
+    path('quote/<int:quote_id>/update-status/', views.update_status, name='update_status'),
 ]
 

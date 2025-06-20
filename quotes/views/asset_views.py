@@ -3,6 +3,7 @@ from quotes.models import (
     Course, LiveVideo, Talent, AnimatedVideo,
     Studio, TechnicalStaff, Quote
 )
+from django.views.decorators.http import require_POST
 
 def clear_all(request):
     quote_id = request.session.get('quote_id')
@@ -101,4 +102,13 @@ def toggle_archive(request, quote_id):
     quote = get_object_or_404(Quote, pk=quote_id)
     quote.is_archived = not quote.is_archived
     quote.save()
+    return redirect('quote_list')
+
+@require_POST
+def update_status(request, quote_id):
+    quote = get_object_or_404(Quote, pk=quote_id)
+    new_status = request.POST.get('status')
+    if new_status in dict(Quote.STATUS_CHOICES):
+        quote.status = new_status
+        quote.save()
     return redirect('quote_list')

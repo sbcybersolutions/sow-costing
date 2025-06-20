@@ -21,7 +21,18 @@
         <td>{{ quote.client_name }}</td>
         <td>{{ quote.project_name }}</td>
         <td>{{ quote.date }}</td>
-        <td>{{ quote.status }}</td>
+        <td>
+          <form method="post" action="{% url 'update_status' quote.id %}">
+            {% csrf_token %}
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+              {% for value, label in quote.STATUS_CHOICES %}
+                <option value="{{ value }}" {% if quote.status == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
         <td>
           <a href="{% url 'resume_quote' quote.id %}" class="btn btn-sm btn-primary">Open</a>
           <a href="{% url 'review_specific_quote' quote.id %}" class="btn btn-sm btn-secondary">Review</a>
@@ -53,6 +64,7 @@
         <td>{{ quote.project_name }}</td>
         <td>{{ quote.date }}</td>
         <td>{{ quote.status }}</td>
+
         <td>
           <a href="{% url 'resume_quote' quote.id %}" class="btn btn-sm btn-primary">Open</a>
           <a href="{% url 'review_specific_quote' quote.id %}" class="btn btn-sm btn-secondary">Review</a>

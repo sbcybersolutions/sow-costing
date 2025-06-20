@@ -115,7 +115,12 @@ def quote_review(request):
 def quote_list(request):
     quotes = Quote.objects.filter(is_archived=False).order_by('-created_at')
     archived = Quote.objects.filter(is_archived=True).order_by('-created_at')
-    return render(request, 'quotes/quote_list.html', {'quotes': quotes, 'archived': archived})
+    return render(request, 'quotes/quote_list.html', {
+        'quotes': quotes,
+        'archived': archived,
+        'STATUS_CHOICES': Quote.STATUS_CHOICES,  # optional
+    })
+
 
 
 def resume_quote(request, quote_id):
